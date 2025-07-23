@@ -5,16 +5,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para ler dados do body se necessário futuramente
 app.use(express.json());
-
-// Servir arquivos estáticos da pasta "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Caminho para o arquivo onde os dados são armazenados
 const filePath = path.join(__dirname, 'coletados.json');
 
-// Endpoint para retornar os dados coletados no dashboard
 app.get('/dados', (req, res) => {
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
@@ -32,7 +27,36 @@ app.get('/dados', (req, res) => {
   });
 });
 
-// Iniciar o servidor
+app.post('/coletar', (req, res) => {
+  const novoDado = req.body;
+
+  if (!novoDado || !novoDado.ip || !novoDado.userAgent) {
+    return res.status(400).json({ erro: 'Dados inválidos.' });
+  }
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    let dados = [];
+    if (!err && data) {
+      try {
+        dados = JSON.parse(data);
+      } catch (parseErr) {
+        console.error('Erro ao parsear coletados.json:', parseErr);
+      }
+    }
+
+    dados.push(novoDado);
+
+    fs.writeFile(filePath, JSON.stringify(dados, null, 2), writeErr => {
+      if (writeErr) {
+        console.error('Erro ao salvar dados:', writeErr);
+        return res.status(500).json({ erro: 'Erro ao salvar dados.' });
+      }
+
+      res.status(201).json({ sucesso: true });
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
