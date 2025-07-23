@@ -2,8 +2,7 @@
 [
   {
     "ip": "123.123.123.123",
-    "browser": "Chrome",
-    "location": "Brazil",
-    "timestamp": "2025-07-23T19:00:00Z"
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0...)",
+    "localizacao": "São Paulo, BR"
   }
 ]
