@@ -1,29 +1,62 @@
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
-
+const path = require('path');
+const fetch = require('node-fetch'); // certifique-se de que está instalado
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Servir arquivos da pasta public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ Rota para fornecer os dados coletados
-app.get('/dados', (req, res) => {
-  fs.readFile(path.join(__dirname, 'coletados.json'), 'utf8', (err, data) => {
-    if (err) {
-      console.error('Erro ao ler coletados.json:', err);
-      return res.status(500).json({ erro: 'Erro ao ler os dados.' });
+// Rota para coletar dados
+app.get('/coletar', async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+  let localizacao = 'Desconhecida';
+
+  try {
+    const resposta = await fetch(`https://ipapi.co/${ip}/json/`);
+    const dadosGeo = await resposta.json();
+    if (dadosGeo && dadosGeo.city && dadosGeo.country) {
+      localizacao = `${dadosGeo.city}, ${dadosGeo.country}`;
     }
-    try {
-      const json = JSON.parse(data);
-      res.json(json);
-    } catch (e) {
-      console.error('JSON inválido em coletados.json:', e);
-      res.status(500).json({ erro: 'Formato inválido.' });
+  } catch (err) {
+    console.error('Erro ao obter localização:', err.message);
+  }
+
+  const novoDado = {
+    ip,
+    userAgent,
+    localizacao
+  };
+
+  const arquivo = path.join(__dirname, 'coletados.json');
+  let dadosAtuais = [];
+
+  try {
+    if (fs.existsSync(arquivo)) {
+      const conteudo = fs.readFileSync(arquivo, 'utf-8');
+      dadosAtuais = JSON.parse(conteudo);
     }
-  });
+  } catch (err) {
+    console.error('Erro ao ler arquivo:', err.message);
+  }
+
+  dadosAtuais.push(novoDado);
+
+  try {
+    fs.writeFileSync(arquivo, JSON.stringify(dadosAtuais, null, 2));
+  } catch (err) {
+    console.error('Erro ao salvar dados:', err.message);
+  }
+
+  res.sendStatus(200);
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+// Rota para fornecer os dados para a dashboard
+app.get('/dados', (req, res) => {
+  const arquivo = path.join(__dirname, 'coletados.json');
+  try {
+    if (fs.existsSync(arquivo)) {
+      const cont
+
