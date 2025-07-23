@@ -1,73 +1,35 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch'); // certifique-se de que está instalado
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Servir arquivos da pasta public
+// Middleware para ler dados do body se necessário futuramente
+app.use(express.json());
+
+// Servir arquivos estáticos da pasta "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota para coletar dados
-app.get('/coletar', async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  const userAgent = req.headers['user-agent'];
-  let localizacao = 'Desconhecida';
+// Caminho para o arquivo onde os dados são armazenados
+const filePath = path.join(__dirname, 'coletados.json');
 
-  try {
-    const resposta = await fetch(`https://ipapi.co/${ip}/json/`);
-    const dadosGeo = await resposta.json();
-    if (dadosGeo && dadosGeo.city && dadosGeo.country) {
-      localizacao = `${dadosGeo.city}, ${dadosGeo.country}`;
-    }
-  } catch (err) {
-    console.error('Erro ao obter localização:', err.message);
-  }
-
-  const novoDado = {
-    ip,
-    userAgent,
-    localizacao
-  };
-
-  const arquivo = path.join(__dirname, 'coletados.json');
-  let dadosAtuais = [];
-
-  try {
-    if (fs.existsSync(arquivo)) {
-      const conteudo = fs.readFileSync(arquivo, 'utf-8');
-      dadosAtuais = JSON.parse(conteudo);
-    }
-  } catch (err) {
-    console.error('Erro ao ler arquivo:', err.message);
-  }
-
-  dadosAtuais.push(novoDado);
-
-  try {
-    fs.writeFileSync(arquivo, JSON.stringify(dadosAtuais, null, 2));
-  } catch (err) {
-    console.error('Erro ao salvar dados:', err.message);
-  }
-
-  res.sendStatus(200);
-});
-
-// Rota para fornecer os dados para a dashboard
+// Endpoint para retornar os dados coletados no dashboard
 app.get('/dados', (req, res) => {
-  const arquivo = path.join(__dirname, 'coletados.json');
-  try {
-    if (fs.existsSync(arquivo)) {
-      const conteudo = fs.readFileSync(arquivo, 'utf-8');
-      const dados = JSON.parse(conteudo);
-      res.json(dados);
-    } else {
-      res.json([]);
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Erro ao ler coletados.json:', err);
+      return res.status(500).json({ erro: 'Erro ao ler dados.' });
     }
-  } catch (err) {
-    console.error('Erro ao ler dados:', err.message);
-    res.status(500).send('Erro ao ler dados.');
-  }
+
+    try {
+      const json = JSON.parse(data);
+      res.json(json);
+    } catch (parseErr) {
+      console.error('Erro ao parsear JSON:', parseErr);
+      res.status(500).json({ erro: 'Erro no formato dos dados.' });
+    }
+  });
 });
 
 // Iniciar o servidor
