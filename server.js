@@ -1,20 +1,16 @@
 const express = require('express');
 const path = require('path');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Permite servir arquivos estáticos (index.html, style.css, script.js, imagens...)
+// Serve arquivos estáticos da pasta "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota principal (caso alguém acesse apenas "/")
+// Rota principal para o index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Rota opcional para painel, se quiser usar /dashboard ou algo assim
-// app.get('/dashboard', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-// });
 
 // Inicia o servidor
 app.listen(PORT, () => {
