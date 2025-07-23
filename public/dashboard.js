@@ -1,21 +1,43 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const logList = document.getElementById('log-list');
-
+document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const response = await fetch('/dados');
-    if (!response.ok) throw new Error('Erro ao buscar dados');
+    const res = await fetch("/dados");
+    const dados = await res.json();
+    const container = document.getElementById("log-list");
 
-    const dados = await response.json();
-    if (!Array.isArray(dados)) throw new Error('Formato inválido');
+    dados.reverse().forEach((dado, index) => {
+      const div = document.createElement("div");
+      div.classList.add("card");
 
-    dados.forEach(dado => {
-      const div = document.createElement('div');
-      div.className = 'log-item';
-      div.textContent = `${dado.ip} - ${dado.userAgent} - ${dado.userName} - ${dado.localizacao}`;
-      logList.appendChild(div);
+      const ip = dado.ip || "N/A";
+      const ua = dado.userAgent || "N/A";
+      const city = dado.city || "N/A";
+      const region = dado.region || "N/A";
+      const country = dado.country || "N/A";
+      const resolution = dado.screenResolution || "N/A";
+      const timestamp = dado.timestamp || "Data não registrada";
+
+      div.innerHTML = `
+        <p><strong>IP:</strong> ${ip}</p>
+        <p><strong>Navegador:</strong> ${ua}</p>
+        <p><strong>Localização:</strong> ${city}, ${region}, ${country}</p>
+        <p><strong>Resolução:</strong> ${resolution}</p>
+        <p><strong>Data/Hora:</strong> ${timestamp}</p>
+      `;
+
+      // se quiser mostrar a imagem associada (opcional)
+      // você precisaria salvar o nome da imagem no JSON também
+      // exemplo abaixo, assumindo que foi salvo como dado.photoFileName
+      if (dado.photoFileName) {
+        const img = document.createElement("img");
+        img.src = `/uploads/${dado.photoFileName}`;
+        img.alt = "Foto do visitante";
+        div.appendChild(img);
+      }
+
+      container.appendChild(div);
     });
-  } catch (error) {
-    logList.textContent = 'Erro ao carregar dados.';
-    console.error(error);
+  } catch (e) {
+    console.error("Erro ao carregar dados:", e);
+    document.getElementById("log-list").textContent = "Erro ao carregar os dados.";
   }
 });
