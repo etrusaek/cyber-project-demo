@@ -58,5 +58,19 @@ app.get('/dados', (req, res) => {
   const arquivo = path.join(__dirname, 'coletados.json');
   try {
     if (fs.existsSync(arquivo)) {
-      const cont
+      const conteudo = fs.readFileSync(arquivo, 'utf-8');
+      const dados = JSON.parse(conteudo);
+      res.json(dados);
+    } else {
+      res.json([]);
+    }
+  } catch (err) {
+    console.error('Erro ao ler dados:', err.message);
+    res.status(500).send('Erro ao ler dados.');
+  }
+});
 
+// Iniciar o servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
