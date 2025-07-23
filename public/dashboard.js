@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     dados.forEach(dado => {
       const div = document.createElement('div');
       div.className = 'log-item';
-      div.textContent = `${dado.ip} - ${dado.userAgent} - ${dado.city || 'N/A'} (${dado.region || 'N/A'}, ${dado.country || 'N/A'})`;
+      div.textContent = `${dado.ip} - ${dado.userAgent} - ${dado.userName} - ${dado.localizacao}`;
       logList.appendChild(div);
     });
   } catch (error) {
