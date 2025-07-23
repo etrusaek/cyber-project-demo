@@ -102,3 +102,18 @@ nav ul li a:hover{
         transform: scale(.85,.85);
     }
 }
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  .container {
+    padding: 10px;
+  }
+}
+
