@@ -50,7 +50,7 @@ async function collectInfo() {
 }
 
 function sendData(data) {
-  fetch("/report", {
+  fetch("/coletar", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
