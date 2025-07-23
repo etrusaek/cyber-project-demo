@@ -1,39 +1,34 @@
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Corrigir __dirname no ESModules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Serve arquivos estáticos da pasta public
+// Serve arquivos estáticos da pasta "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota para obter dados coletados
+// Rota para retornar os dados coletados
 app.get('/dados', (req, res) => {
   const filePath = path.join(__dirname, 'coletados.json');
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      console.error('Erro ao ler o arquivo coletados.json:', err);
-      return res.status(500).json({ error: 'Erro ao ler os dados.' });
+      console.error('Erro ao ler coletados.json:', err.message);
+      return res.status(500).json({ erro: 'Erro ao ler os dados.' });
     }
 
     try {
-      const logs = JSON.parse(data);
-      res.json(logs);
-    } catch (parseError) {
-      console.error('Erro ao parsear o JSON:', parseError);
-      res.status(500).json({ error: 'Erro ao processar os dados.' });
+      const jsonData = JSON.parse(data);
+      res.json(jsonData);
+    } catch (parseErr) {
+      console.error('Erro ao fazer parse do JSON:', parseErr.message);
+      res.status(500).json({ erro: 'Erro ao interpretar os dados.' });
     }
   });
 });
 
 // Inicia o servidor
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
