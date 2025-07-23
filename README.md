@@ -1,3 +1,8 @@
+![GitHub last commit](https://img.shields.io/github/last-commit/etrusaek/cyber-project-demo)
+![GitHub License](https://img.shields.io/github/license/etrusaek/cyber-project-demo)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/etrusaek/cyber-project-demo)
+
+
 ## 🛡️ Cyber Demo – Trackeamento de Dados via Web
 
 > ⚠️ **Este projeto é apenas para fins de demonstração, conscientização e aprendizado. Não deve ser usado em ambientes públicos sem consentimento ou autorização legal.**
